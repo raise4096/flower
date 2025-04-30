@@ -80,7 +80,7 @@
 </head>
 <body>
   <div id="controls">
-    速度: <input type="range" id="speedRange" min="1" max="20" value="5" />
+    速度: <input type="range" id="speedRange" min="1" max="100" value="5" />
     <button onclick="startScroll()">▶ 開始</button>
     <button onclick="stopScroll()">■ 停止</button>
     <button onclick="makeTextWhite()">☀ 全文白くする</button>
@@ -111,7 +111,7 @@
 
     function makeTextWhite() {
       const el = document.getElementById('textInput');
-      el.innerHTML = `<span style="color: white;">${el.innerText.replace(/\n/g, '<br>')}</span>`;
+      el.innerHTML = `<span style=\"color: white;\">${el.innerText.replace(/\n/g, '<br>')}</span>`;
     }
 
     document.getElementById('speedRange').addEventListener('input', function () {
