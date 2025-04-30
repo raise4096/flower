@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>自動スクロールビューア（div版・長文対応＋白文字化）</title>
+  <title>自動スクロールビューア（div版・長文対応＋白文字化＋高速化）</title>
   <style>
     body {
       margin: 0;
@@ -100,7 +100,8 @@
       const speed = parseInt(document.getElementById('speedRange').value);
       scrollInterval = setInterval(() => {
         const text = document.getElementById('scrollContainer');
-        text.scrollTop += 1;
+        const scrollAmount = Math.max(1, speed / 2);
+        text.scrollTop += scrollAmount;
       }, 1000 / speed);
     }
 
