@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>自動スクロールビューア（div版・長文対応＋白文字化＋高速化）</title>
+  <title>自動スクロールビューア（div版・長文対応＋白文字化＋高速化＋数値入力）</title>
   <style>
     body {
       margin: 0;
@@ -27,8 +27,15 @@
       z-index: 1000;
     }
 
-    #speedRange {
-      margin: 0 10px;
+    #speedInput {
+      width: 60px;
+      text-align: right;
+      font-size: 16px;
+      padding: 3px;
+      border-radius: 4px;
+      border: none;
+      background: #333;
+      color: #f0f0f0;
     }
 
     #scrollContainer {
@@ -72,15 +79,11 @@
     button:hover {
       background-color: #666;
     }
-
-    input[type=range] {
-      accent-color: #888;
-    }
   </style>
 </head>
 <body>
   <div id="controls">
-    速度: <input type="range" id="speedRange" min="1" max="100" value="5" />
+    速度: <input type="number" id="speedInput" min="1" max="100" value="5" />
     <button onclick="startScroll()">▶ 開始</button>
     <button onclick="stopScroll()">■ 停止</button>
     <button onclick="makeTextWhite()">☀ 全文白くする</button>
@@ -97,7 +100,11 @@
 
     function startScroll() {
       if (scrollInterval) return;
-      const speed = parseInt(document.getElementById('speedRange').value);
+      const speed = parseInt(document.getElementById('speedInput').value);
+      if (isNaN(speed) || speed < 1 || speed > 100) {
+        alert("速度は1～100の間で指定してください");
+        return;
+      }
       scrollInterval = setInterval(() => {
         const text = document.getElementById('scrollContainer');
         const scrollAmount = Math.max(1, speed / 2);
@@ -114,13 +121,6 @@
       const el = document.getElementById('textInput');
       el.innerHTML = `<span style=\"color: white;\">${el.innerText.replace(/\n/g, '<br>')}</span>`;
     }
-
-    document.getElementById('speedRange').addEventListener('input', function () {
-      if (scrollInterval) {
-        stopScroll();
-        startScroll();
-      }
-    });
   </script>
 </body>
 </html>
