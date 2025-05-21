@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pomodoro Flex</title>
+  <title>ポモドーロ Flex</title>
   <!--
-  Pomodoro Flex – a configurable Pomodoro timer.
+  ポモドーロ Flex – 柔軟設定タイマー
   © 2025 N I & Contributors – MIT License
-  Paste this file as index.html in a GitHub repository and switch on GitHub Pages.
+  保存して GitHub Pages で公開するだけで動く単一 HTML。
   -->
   <style>
     :root { font-family: system-ui, sans-serif; --accent:#e63946; --bg:#f1faee; --fg:#1d3557; }
     body{margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background:var(--bg);color:var(--fg);}
-    #app{background:#fff;padding:2rem;border-radius:1rem;box-shadow:0 4px 20px rgba(0,0,0,.1);text-align:center;width:320px;}
+    #app{background:#fff;padding:2rem;border-radius:1rem;box-shadow:0 4px 20px rgba(0,0,0,.1);text-align:center;width:330px;}
     h1{margin-top:0;color:var(--accent);}label{display:block;margin:.5rem 0;font-weight:600;}input{width:100%;padding:.3rem .5rem;font-size:1rem;margin-top:.25rem;border:1px solid #ccc;border-radius:.25rem;}
-    button{margin:.75rem .25rem;padding:.6rem 1rem;font-size:1rem;font-weight:700;border:none;border-radius:.5rem;background:var(--accent);color:#fff;cursor:pointer;transition:opacity .2s;}
+    button{margin:.75rem .25rem;padding:.6rem 1.2rem;font-size:1rem;font-weight:700;border:none;border-radius:.5rem;background:var(--accent);color:#fff;cursor:pointer;transition:opacity .2s;}
     button[disabled]{opacity:.5;cursor:not-allowed;}
     #status{margin:1rem 0 .5rem;font-size:1.1rem;font-weight:700;}
     #timer{font-size:2.5rem;font-weight:800;letter-spacing:.05em;}
@@ -22,26 +22,26 @@
 </head>
 <body>
   <div id="app">
-    <h1>Pomodoro Flex</h1>
-    <label>Work (minutes)
+    <h1>ポモドーロ&nbsp;Flex</h1>
+    <label>作業 (分)
       <input id="work" type="number" min="1" value="25">
     </label>
-    <label>Break (minutes)
+    <label>休憩 (分)
       <input id="break" type="number" min="1" value="5">
     </label>
-    <label>Rounds
+    <label>ラウンド数
       <input id="rounds" type="number" min="1" value="4">
     </label>
     <div>
-      <button id="start">Start</button>
-      <button id="stop" disabled>Stop</button>
+      <button id="start">開始</button>
+      <button id="stop" disabled>停止</button>
     </div>
-    <h2 id="status">Ready</h2>
+    <h2 id="status">待機中</h2>
     <div id="timer">00:00</div>
   </div>
 
 <script>
-// ===== Pomodoro Flex core =====
+// ===== ポモドーロ Flex core =====
 let timerId = null;
 let phase = "work"; // "work" or "break"
 let remainingSeconds = 0;
@@ -67,7 +67,7 @@ function startTimer() {
   phase = "work";
   remainingSeconds = workSeconds;
   updateDisplay();
-  beep();
+  beep(1); // スタート音 1 回
 
   startBtn.disabled = true;
   stopBtn.disabled  = false;
@@ -80,9 +80,9 @@ function stopTimer() {
   timerId = null;
   startBtn.disabled = false;
   stopBtn.disabled  = true;
-  statusEl.textContent = "Stopped";
+  statusEl.textContent = "停止中";
   timerEl.textContent  = "00:00";
-  document.title = "Pomodoro Flex";
+  document.title = "ポモドーロ Flex";
 }
 
 function tick() {
@@ -95,13 +95,13 @@ function tick() {
       roundsLeft--;
       if (roundsLeft <= 0) {
         stopTimer();
-        beep(2); // double beep for finish
+        beep(10); // 完了音 10 回
         return;
       }
       phase = "work";
       remainingSeconds = workSeconds;
     }
-    beep();
+    beep(5); // フェーズ切替音 5 回
   }
   updateDisplay();
 }
@@ -110,18 +110,18 @@ function updateDisplay() {
   const m = Math.floor(remainingSeconds / 60).toString().padStart(2, "0");
   const s = (remainingSeconds % 60).toString().padStart(2, "0");
   timerEl.textContent  = `${m}:${s}`;
-  statusEl.textContent = `${phase.toUpperCase()} — ${roundsLeft} round${roundsLeft === 1 ? "" : "s"} left`;
+  const phaseJP        = phase === "work" ? "作業中" : "休憩中";
+  statusEl.textContent = `${phaseJP} — 残り ${roundsLeft} ラウンド`;
   document.title       = `${m}:${s} ${phase === "work" ? "⚒" : "☕"}`;
 }
 
 function beep(n = 1) {
-  // simple Web Audio API beep
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const duration = 0.15;
   for (let i = 0; i < n; i++) {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.frequency.value = 880; // A5
+    osc.frequency.value = 880;
     osc.type = "sine";
     osc.connect(gain);
     gain.connect(ctx.destination);
