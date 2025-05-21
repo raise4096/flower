@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pomodoro Flex</title>
+  <!--
+  Pomodoro Flex – a configurable Pomodoro timer.
+  © 2025 N I & Contributors – MIT License
+  Paste this file as index.html in a GitHub repository and switch on GitHub Pages.
+  -->
+  <style>
+    :root { font-family: system-ui, sans-serif; --accent:#e63946; --bg:#f1faee; --fg:#1d3557; }
+    body{margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background:var(--bg);color:var(--fg);}
+    #app{background:#fff;padding:2rem;border-radius:1rem;box-shadow:0 4px 20px rgba(0,0,0,.1);text-align:center;width:320px;}
+    h1{margin-top:0;color:var(--accent);}label{display:block;margin:.5rem 0;font-weight:600;}input{width:100%;padding:.3rem .5rem;font-size:1rem;margin-top:.25rem;border:1px solid #ccc;border-radius:.25rem;}
+    button{margin:.75rem .25rem;padding:.6rem 1rem;font-size:1rem;font-weight:700;border:none;border-radius:.5rem;background:var(--accent);color:#fff;cursor:pointer;transition:opacity .2s;}
+    button[disabled]{opacity:.5;cursor:not-allowed;}
+    #status{margin:1rem 0 .5rem;font-size:1.1rem;font-weight:700;}
+    #timer{font-size:2.5rem;font-weight:800;letter-spacing:.05em;}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>Pomodoro Flex</h1>
+    <label>Work (minutes)
+      <input id="work" type="number" min="1" value="25">
+    </label>
+    <label>Break (minutes)
+      <input id="break" type="number" min="1" value="5">
+    </label>
+    <label>Rounds
+      <input id="rounds" type="number" min="1" value="4">
+    </label>
+    <div>
+      <button id="start">Start</button>
+      <button id="stop" disabled>Stop</button>
+    </div>
+    <h2 id="status">Ready</h2>
+    <div id="timer">00:00</div>
+  </div>
+
+<script>
+// ===== Pomodoro Flex core =====
+let timerId = null;
+let phase = "work"; // "work" or "break"
+let remainingSeconds = 0;
+let workSeconds, breakSeconds, roundsLeft;
+
+const workInput   = document.getElementById("work");
+const breakInput  = document.getElementById("break");
+const roundsInput = document.getElementById("rounds");
+const startBtn    = document.getElementById("start");
+const stopBtn     = document.getElementById("stop");
+const statusEl    = document.getElementById("status");
+const timerEl     = document.getElementById("timer");
+
+startBtn.addEventListener("click", startTimer);
+stopBtn .addEventListener("click", stopTimer);
+
+function startTimer() {
+  workSeconds   = parseInt(workInput.value, 10) * 60;
+  breakSeconds  = parseInt(breakInput.value, 10) * 60;
+  roundsLeft    = parseInt(roundsInput.value, 10);
+  if (isNaN(workSeconds) || isNaN(breakSeconds) || isNaN(roundsLeft) || workSeconds <= 0 || breakSeconds <= 0 || roundsLeft <= 0) return;
+
+  phase = "work";
+  remainingSeconds = workSeconds;
+  updateDisplay();
+  beep();
+
+  startBtn.disabled = true;
+  stopBtn.disabled  = false;
+
+  timerId = setInterval(tick, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerId);
+  timerId = null;
+  startBtn.disabled = false;
+  stopBtn.disabled  = true;
+  statusEl.textContent = "Stopped";
+  timerEl.textContent  = "00:00";
+  document.title = "Pomodoro Flex";
+}
+
+function tick() {
+  remainingSeconds--;
+  if (remainingSeconds <= 0) {
+    if (phase === "work") {
+      phase = "break";
+      remainingSeconds = breakSeconds;
+    } else {
+      roundsLeft--;
+      if (roundsLeft <= 0) {
+        stopTimer();
+        beep(2); // double beep for finish
+        return;
+      }
+      phase = "work";
+      remainingSeconds = workSeconds;
+    }
+    beep();
+  }
+  updateDisplay();
+}
+
+function updateDisplay() {
+  const m = Math.floor(remainingSeconds / 60).toString().padStart(2, "0");
+  const s = (remainingSeconds % 60).toString().padStart(2, "0");
+  timerEl.textContent  = `${m}:${s}`;
+  statusEl.textContent = `${phase.toUpperCase()} — ${roundsLeft} round${roundsLeft === 1 ? "" : "s"} left`;
+  document.title       = `${m}:${s} ${phase === "work" ? "⚒" : "☕"}`;
+}
+
+function beep(n = 1) {
+  // simple Web Audio API beep
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const duration = 0.15;
+  for (let i = 0; i < n; i++) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.frequency.value = 880; // A5
+    osc.type = "sine";
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime + i * 0.25);
+    osc.stop(ctx.currentTime + i * 0.25 + duration);
+  }
+}
+</script>
+</body>
+</html>
